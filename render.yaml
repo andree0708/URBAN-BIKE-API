@@ -1,0 +1,39 @@
+databases:
+  - name: urbanbike-db
+    databaseName: urbanbike
+    user: urbanbike
+    plan: free
+
+services:
+  - type: web
+    name: urban-bike-api
+    runtime: java
+    plan: free
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/demo-0.0.1-SNAPSHOT.jar
+    healthCheckPath: /health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: API_KEY
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: urbanbike-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: urbanbike-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: urbanbike-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: urbanbike-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: urbanbike-db
+          property: password

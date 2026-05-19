@@ -1,0 +1,91 @@
+{
+  "info": {
+    "_postman_id": "4d54e34f-845e-4599-8b5e-a918a8e2daba",
+    "name": "urban-bike-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54981214",
+    "_collection_link": "https://go.postman.co/collection/54981214-4d54e34f-845e-4599-8b5e-a918a8e2daba?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "bycicles",
+      "item": [
+        {
+          "name": "Listar bicicletas disponibles",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar por tipo",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar bicicleta",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "New Folder Copy",
+      "item": [
+        {
+          "name": "Iniciar alquiler",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"bikeCode\": \"BIC-001\",\r\n  \"clientName\": \"Deisy Torres\",\r\n  \"estimatedHours\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/rentals",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "rentals"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finalizar alquiler",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Historial de alquiler",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
