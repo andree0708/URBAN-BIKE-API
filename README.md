@@ -17,9 +17,7 @@ Además saqué el cálculo de costos a `RentalCalculatorService`, que no toca JP
 | Java | 21 | Lenguaje base del proyecto |
 | Spring Boot | 4.0.6 | Framework principal, arranque de la app |
 | Spring Data JPA | (starter del parent) | Persistencia y repositorios |
-| Spring Security | (starter del parent) | API Key en producción, protección de endpoints |
-| H2 Database | (runtime) | Base en memoria en perfil `dev` (local, sin instalar nada) |
-| PostgreSQL | (runtime) | Base en perfil `prod` (Render en la nube) |
+| H2 Database | (runtime) | Base en memoria (desarrollo local) |
 | Lombok | (starter del parent) | Reducir boilerplate en entidades y DTOs |
 | JUnit 5 | (vía spring-boot-starter-test) | Tests unitarios |
 | Mockito | (incluido en el starter de test) | Mocks en tests de servicios |
@@ -61,32 +59,11 @@ Al arrancar se cargan 5 bicicletas de ejemplo si la base está vacía (`DataInit
 - JDBC URL: `jdbc:h2:mem:urbanbike`
 - Usuario: `sa` | Contraseña: (vacío)
 
-> Si más adelante instalás Docker, podés usar `docker compose up -d` y el perfil `prod` local con Postgres; en la nube (Render) siempre es PostgreSQL.
-
-## Seguridad
-
-Uso **perfiles de Spring** para separar desarrollo y producción:
-
-| Perfil | Base de datos | API Key |
-|--------|---------------|---------|
-| `dev` (local) | H2 en memoria | No requerida |
-| `prod` (Render) | PostgreSQL | Obligatoria (`X-API-Key`) |
-
-En producción cada request (excepto `GET /health`) debe incluir:
-
-```http
-X-API-Key: <valor-de-la-variable-API_KEY>
-```
-
-Si la clave falta o es incorrecta, la API responde **401** con un `ErrorResponse` en JSON.
-
-También validé códigos de bici duplicados con **409 Conflict** en lugar de dejar que la base devuelva un error 500.
-
 ## Endpoints
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/health` | Health check (público, para Render) |
+| GET | `/health` | Health check |
 | POST | `/api/v1/bicycles` | Registrar una bicicleta nueva |
 | GET | `/api/v1/bicycles/available` | Listar bicicletas disponibles (filtro opcional por tipo) |
 | POST | `/api/v1/rentals` | Iniciar un alquiler |
@@ -133,14 +110,7 @@ Para ver el historial de una bicicleta:
 curl http://localhost:8080/api/v1/rentals/bicycle/BIC-001/history
 ```
 
-**En producción (Render)** agregá el header a cada llamada:
-
-```bash
-curl https://tu-app.onrender.com/api/v1/bicycles/available \
-  -H "X-API-Key: TU_API_KEY"
-```
-
-También dejé una colección de Postman en la raíz: `urban-bike-api.postman_collection.json`. En producción configurá la variable `apiKey` en Postman.
+También dejé una colección de Postman en la raíz: `urban-bike-api.postman_collection.json`.
 
 ## Reglas de negocio implementadas
 
@@ -156,35 +126,15 @@ También dejé una colección de Postman en la raíz: `urban-bike-api.postman_co
 ./mvnw test
 ```
 
-En Windows: `mvnw.cmd test`
+En Windows: `.\mvnw.cmd test`
 
 Son **14 tests** en total: 7 para el cálculo de facturación (`RentalCalculatorServiceTest`), 6 para la capa de servicio con mocks (`RentalServiceImplTest`), y 1 que verifica que el contexto de Spring levanta (`ApplicationTests`).
 
 Los **13 tests** de lógica y servicios no necesitan base de datos. El test de contexto (`ApplicationTests`) levanta H2 en perfil `dev`.
 
-## Despliegue en Render (nube)
-
-**¿Por qué no Vercel?** Vercel está pensado para frontends y funciones serverless cortas. Esta API es un JAR de Spring Boot con JVM; encaja mejor en **Render**.
-
-### Pasos en Render
-
-1. Subí el repo a **GitHub** (público).
-2. En [render.com](https://render.com) → **New** → **Blueprint** y conectá el repo (usa el `render.yaml` de la raíz).
-3. Render crea la base PostgreSQL y el Web Service Java automáticamente.
-4. Copiá el valor de `API_KEY` que genera Render (Environment → `API_KEY`).
-5. Probá: `GET https://tu-app.onrender.com/health` (sin key) y luego los endpoints con `X-API-Key`.
-
-Variables que Render configura vía `render.yaml`:
-
-- `SPRING_PROFILES_ACTIVE=prod`
-- `API_KEY` (generada)
-- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` (desde la base)
-
-El plan gratis de Render **duerme** el servicio tras inactividad; el primer request puede tardar ~30 s en despertar.
-
 ## Decisiones de diseño
 
-**H2 en local, PostgreSQL en Render.** En la PC uso H2 para no depender de Docker ni instalar Postgres; en la nube uso PostgreSQL porque los datos deben persistir. El código JPA es el mismo en ambos.
+**H2 en memoria.** Para la prueba técnica no quería que el evaluador instale PostgreSQL. H2 arranca solo y la consola web ayuda a revisar datos si hace falta.
 
 **`RentalCalculatorService` aparte.** La facturación tiene reglas que cambian fácil (redondeos, mínimos, multas). Al no mezclarla con JPA, la probé con tests rápidos sin mocks de base de datos.
 
@@ -192,7 +142,7 @@ El plan gratis de Render **duerme** el servicio tras inactividad; el primer requ
 
 **Inyección por constructor.** Dependencias explícitas; en tests con Mockito paso los mocks por constructor sin trucos.
 
-**API Key en producción.** Es seguridad básica y demostrable sin montar JWT/OAuth para una prueba de practicante. HTTPS lo provee Render.
+**Código de bici duplicado.** Devuelve **409 Conflict** con mensaje claro en lugar de un error genérico de base de datos.
 
 ## Supuestos
 
