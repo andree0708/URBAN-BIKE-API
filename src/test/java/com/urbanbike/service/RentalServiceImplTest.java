@@ -54,7 +54,6 @@ class RentalServiceImplTest {
 
 	@Test
 	void startRental_success() {
-		// Arrange
 		StartRentalRequest request = new StartRentalRequest("BIC-001", "Ana García", 2);
 		Bicycle bicycle = Bicycle.builder()
 				.id(1L)
@@ -70,10 +69,8 @@ class RentalServiceImplTest {
 			return rental;
 		});
 
-		// Act
 		RentalResponse response = rentalService.startRental(request);
 
-		// Assert
 		assertEquals("ACTIVE", response.getRentalStatus());
 		assertEquals(BikeStatus.RENTED, bicycle.getStatus());
 		verify(bicycleRepository).save(bicycle);
@@ -82,17 +79,14 @@ class RentalServiceImplTest {
 
 	@Test
 	void startRental_bikeNotFound() {
-		// Arrange
 		StartRentalRequest request = new StartRentalRequest("BIC-999", "Ana García", 2);
 		when(bicycleRepository.findByCode("BIC-999")).thenReturn(Optional.empty());
 
-		// Act & Assert
 		assertThrows(BikeNotFoundException.class, () -> rentalService.startRental(request));
 	}
 
 	@Test
 	void startRental_bikeNotAvailable() {
-		// Arrange
 		StartRentalRequest request = new StartRentalRequest("BIC-001", "Ana García", 2);
 		Bicycle bicycle = Bicycle.builder()
 				.code("BIC-001")
@@ -101,13 +95,11 @@ class RentalServiceImplTest {
 				.build();
 		when(bicycleRepository.findByCode("BIC-001")).thenReturn(Optional.of(bicycle));
 
-		// Act & Assert
 		assertThrows(BikeNotAvailableException.class, () -> rentalService.startRental(request));
 	}
 
 	@Test
 	void finishRental_success() {
-		// Arrange
 		Bicycle bicycle = Bicycle.builder()
 				.id(1L)
 				.code("BIC-002")
@@ -137,10 +129,8 @@ class RentalServiceImplTest {
 				.thenReturn(costResult);
 		when(rentalRepository.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		// Act
 		RentalResponse response = rentalService.finishRental(5L);
 
-		// Assert
 		assertEquals("FINISHED", response.getRentalStatus());
 		assertNotNull(rental.getEndTime());
 		assertMoney(BigDecimal.valueOf(10000), rental.getBaseCost());
@@ -154,23 +144,19 @@ class RentalServiceImplTest {
 
 	@Test
 	void finishRental_notFound() {
-		// Arrange
 		when(rentalRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-		// Act & Assert
 		assertThrows(RentalNotFoundException.class, () -> rentalService.finishRental(99L));
 	}
 
 	@Test
 	void finishRental_alreadyFinished() {
-		// Arrange
 		Rental rental = Rental.builder()
 				.id(5L)
 				.endTime(LocalDateTime.now())
 				.build();
 		when(rentalRepository.findById(5L)).thenReturn(Optional.of(rental));
 
-		// Act & Assert
 		assertThrows(RentalAlreadyFinishedException.class, () -> rentalService.finishRental(5L));
 	}
 

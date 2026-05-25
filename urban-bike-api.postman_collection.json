@@ -2,51 +2,94 @@
   "info": {
     "_postman_id": "4d54e34f-845e-4599-8b5e-a918a8e2daba",
     "name": "urban-bike-api",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "54981214",
-    "_collection_link": "https://go.postman.co/collection/54981214-4d54e34f-845e-4599-8b5e-a918a8e2daba?source=collection_link"
+    "description": "Colección para probar la API REST de alquiler de bicicletas.\n\nRequisitos: API corriendo en http://localhost:8080 (perfil dev, sin API Key).\n\nOrden sugerido:\n1. Listar disponibles\n2. Iniciar alquiler\n3. Finalizar alquiler (usar el id devuelto en el paso 2)\n4. Ver historial",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "rentalId",
+      "value": "1"
+    },
+    {
+      "key": "bikeCode",
+      "value": "BIC-001"
+    }
+  ],
   "item": [
     {
-      "name": "bycicles",
+      "name": "Health",
       "item": [
         {
-          "name": "Listar bicicletas disponibles",
+          "name": "Health check",
           "request": {
             "method": "GET",
-            "header": []
-          },
-          "response": []
-        },
-        {
-          "name": "Filtrar por tipo",
-          "request": {
-            "method": "GET",
-            "header": []
-          },
-          "response": []
-        },
-        {
-          "name": "Registrar bicicleta",
-          "request": {
-            "method": "GET",
-            "header": []
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica que la API está en ejecución."
           },
           "response": []
         }
       ]
     },
     {
-      "name": "New Folder Copy",
+      "name": "Bicicletas",
       "item": [
         {
-          "name": "Iniciar alquiler",
+          "name": "Listar bicicletas disponibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bicycles/available",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bicycles", "available"]
+            },
+            "description": "Devuelve todas las bicicletas con estado AVAILABLE."
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar disponibles por tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bicycles/available?type=MOUNTAIN",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bicycles", "available"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "MOUNTAIN",
+                  "description": "URBAN | MOUNTAIN | ELECTRIC"
+                }
+              ]
+            },
+            "description": "Filtra disponibles por tipo de bicicleta."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar bicicleta",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"bikeCode\": \"BIC-001\",\r\n  \"clientName\": \"Deisy Torres\",\r\n  \"estimatedHours\": 2\r\n}",
+              "raw": "{\n  \"code\": \"BIC-010\",\n  \"type\": \"URBAN\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -54,34 +97,72 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/v1/rentals",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "v1",
-                "rentals"
-              ]
-            }
+              "raw": "{{baseUrl}}/api/v1/bicycles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bicycles"]
+            },
+            "description": "Crea una bicicleta nueva. type: URBAN, MOUNTAIN o ELECTRIC."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Alquileres",
+      "item": [
+        {
+          "name": "Iniciar alquiler",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bikeCode\": \"{{bikeCode}}\",\n  \"clientName\": \"Ana García\",\n  \"estimatedHours\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rentals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rentals"]
+            },
+            "description": "Inicia un alquiler. Guarda el id de la respuesta para finalizar."
           },
           "response": []
         },
         {
           "name": "Finalizar alquiler",
           "request": {
-            "method": "GET",
-            "header": []
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rentals/{{rentalId}}/finish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rentals", "{{rentalId}}", "finish"]
+            },
+            "description": "Finaliza el alquiler y calcula costos. Cambia la variable rentalId con el id del POST anterior."
           },
           "response": []
         },
         {
-          "name": "Historial de alquiler",
+          "name": "Historial por código de bici",
           "request": {
             "method": "GET",
-            "header": []
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rentals/bicycle/{{bikeCode}}/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rentals", "bicycle", "{{bikeCode}}", "history"]
+            },
+            "description": "Historial de alquileres de una bicicleta (activos y finalizados)."
           },
           "response": []
         }

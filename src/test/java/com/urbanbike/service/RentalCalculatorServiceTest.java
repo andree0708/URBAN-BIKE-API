@@ -27,15 +27,12 @@ class RentalCalculatorServiceTest {
 
 	@Test
 	void exactTwoHoursMountain() {
-		// Arrange
 		LocalDateTime end = START.plusHours(2);
 		int estimatedHours = 2;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.MOUNTAIN, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(2, result.realHours());
 		assertEquals(0, result.delayHours());
 		assertMoney(BigDecimal.valueOf(10000), result.baseCost());
@@ -45,15 +42,12 @@ class RentalCalculatorServiceTest {
 
 	@Test
 	void roundedHoursMountain() {
-		// Arrange
 		LocalDateTime end = START.plusHours(1).plusMinutes(10);
 		int estimatedHours = 2;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.MOUNTAIN, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(2, result.realHours());
 		assertEquals(0, result.delayHours());
 		assertMoney(BigDecimal.valueOf(10000), result.baseCost());
@@ -63,15 +57,12 @@ class RentalCalculatorServiceTest {
 
 	@Test
 	void penaltyCalculation() {
-		// Arrange
 		LocalDateTime end = START.plusHours(3).plusMinutes(20);
 		int estimatedHours = 2;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.MOUNTAIN, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(4, result.realHours());
 		assertEquals(2, result.delayHours());
 		assertMoney(BigDecimal.valueOf(20000), result.baseCost());
@@ -81,15 +72,12 @@ class RentalCalculatorServiceTest {
 
 	@Test
 	void electricExactReturn() {
-		// Arrange
 		LocalDateTime end = START.plusHours(2);
 		int estimatedHours = 2;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.ELECTRIC, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(2, result.realHours());
 		assertEquals(0, result.delayHours());
 		assertMoney(BigDecimal.valueOf(15000), result.baseCost());
@@ -99,30 +87,24 @@ class RentalCalculatorServiceTest {
 
 	@Test
 	void minimumOneHourPenalty() {
-		// Arrange
 		LocalDateTime end = START.plusHours(2).plusMinutes(10);
 		int estimatedHours = 2;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.MOUNTAIN, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(1, result.delayHours());
 		assertMoney(BigDecimal.valueOf(2500), result.penaltyAmount());
 	}
 
 	@Test
 	void urbanWithDelay() {
-		// Arrange
 		LocalDateTime end = START.plusHours(1).plusMinutes(10);
 		int estimatedHours = 1;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.URBAN, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(2, result.realHours());
 		assertEquals(1, result.delayHours());
 		assertMoney(BigDecimal.valueOf(7000), result.baseCost());
@@ -132,15 +114,12 @@ class RentalCalculatorServiceTest {
 
 	@Test
 	void lessThanOneMinute() {
-		// Arrange
 		LocalDateTime end = START.plusSeconds(30);
 		int estimatedHours = 1;
 
-		// Act
 		RentalCostResult result = rentalCalculatorService.calculate(
 				BikeType.URBAN, START, end, estimatedHours);
 
-		// Assert
 		assertEquals(1, result.realHours());
 		assertEquals(0, result.delayHours());
 		assertMoney(BigDecimal.valueOf(3500), result.baseCost());
